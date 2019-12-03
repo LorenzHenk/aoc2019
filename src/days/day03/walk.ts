@@ -3,11 +3,13 @@ import { Path, Direction } from "./parse";
 export interface WalkPosition {
   x: number;
   y: number;
+  step: number;
 }
 
 export function* walkPath(path: Path) {
   let x = 0;
   let y = 0;
+  let step = 0;
 
   for (let ix = 0; ix < path.length; ix++) {
     const task = path[ix];
@@ -26,7 +28,8 @@ export function* walkPath(path: Path) {
           x++;
           break;
       }
-      yield { x, y } as WalkPosition;
+      step++;
+      yield { x, y, step } as WalkPosition;
     }
   }
 }
