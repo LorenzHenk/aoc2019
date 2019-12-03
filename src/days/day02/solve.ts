@@ -9,3 +9,19 @@ export const solvePartOne = (input: string) => {
 
   return result[0];
 };
+
+export const solvePartTwo = (input: string) => {
+  const originalIntcode = parse(input);
+  for (let noun = 0; noun < 100; noun++) {
+    for (let verb = 0; verb < 100; verb++) {
+      const ic = [...originalIntcode];
+      ic[1] = noun;
+      ic[2] = verb;
+      const result = run(ic);
+
+      if (result[0] === 19690720) {
+        return 100 * noun + verb;
+      }
+    }
+  }
+};
