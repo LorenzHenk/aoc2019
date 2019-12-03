@@ -1,5 +1,10 @@
 import { Path, Direction } from "./parse";
 
+export interface WalkPosition {
+  x: number;
+  y: number;
+}
+
 export function* walkPath(path: Path) {
   let x = 0;
   let y = 0;
@@ -21,7 +26,7 @@ export function* walkPath(path: Path) {
           x++;
           break;
       }
-      yield { x, y };
+      yield { x, y } as WalkPosition;
     }
   }
 }

@@ -1,5 +1,5 @@
 import { parse } from "./parse";
-import { walkPath } from "./walk";
+import { walkPath, WalkPosition } from "./walk";
 
 export const solvePartOne = (input: string) => {
   const [leftPath, rightPath] = parse(input);
@@ -7,32 +7,27 @@ export const solvePartOne = (input: string) => {
   const left = walkPath(leftPath);
   const right = walkPath(rightPath);
 
-  const result = [];
+  const result: number[] = [];
 
-  let resLeft = left.next();
-  let resRight = right.next();
-
-  while (!resLeft.done && !resRight.done) {
-    if (
-      resLeft.value.x === resRight.value.x &&
-      resLeft.value.y === resRight.value.y
-    ) {
-      console.log("CROSSING", resLeft.value.x, resLeft.value.y);
-      result.push(Math.abs(resLeft.value.x) + Math.abs(resLeft.value.y));
-    }
-
-    const tempResLeft = left.next();
-    const tempResRight = right.next();
-    if (tempResLeft.done && tempResRight.done) {
-      break;
-    }
-    if (!tempResLeft.done) {
-      resLeft = tempResLeft;
-    }
-    if (!tempResRight.done) {
-      resRight = tempResRight;
-    }
+  let leftResults: Record<string, WalkPosition> = {};
+  let next;
+  while (!(next = left.next()).done) {
+    const v = next.value as WalkPosition;
+    leftResults[`${v.x}.${v.y}`] = v;
   }
+
+  let rightResults: Record<string, WalkPosition> = {};
+  while (!(next = right.next()).done) {
+    const v = next.value as WalkPosition;
+    rightResults[`${v.x}.${v.y}`] = v;
+  }
+
+  Object.keys(leftResults).forEach(lr => {
+    if (rightResults[lr]) {
+      const v = rightResults[lr];
+      result.push(Math.abs(v.x) + Math.abs(v.y));
+    }
+  });
 
   return Math.min(...result);
 };

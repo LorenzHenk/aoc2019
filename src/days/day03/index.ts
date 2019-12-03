@@ -1,4 +1,6 @@
-export const partOne = (input: string) => undefined;
+import { solvePartOne } from "./solve";
+
+export const partOne = solvePartOne;
 
 export const partTwo = (input: string) => undefined;
 
