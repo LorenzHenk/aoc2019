@@ -63,7 +63,10 @@ export default async (day: string) => {
 
   writeFileSync(
     join(basePath, "input.ts"),
-    `export default \`${inputFileContent}\``,
+    `export default \`${inputFileContent.substr(
+      0,
+      inputFileContent.length - 1,
+    )}\``,
   );
   log.log("success", "Saved input file");
 
