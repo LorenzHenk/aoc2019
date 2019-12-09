@@ -3,10 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import chalk from "chalk";
 import { log } from "./logging";
 import { runDay } from "./exec";
 import init from "./init";
+
+export const __basepath = __dirname;
 
 program.version("1.0.0");
 

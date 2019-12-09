@@ -1,5 +1,7 @@
 import { writeFileSync, mkdirSync, copyFileSync, existsSync } from "fs";
 
+import { copy } from "fs-extra";
+
 import { join } from "path";
 
 import axios from "axios";
@@ -7,6 +9,7 @@ import { JSDOM } from "jsdom";
 import turndown from "turndown";
 
 import { log } from "./logging";
+import { __basepath } from ".";
 
 const turner = new turndown({
   fence: "```",
@@ -39,7 +42,8 @@ export default async (day: string) => {
 
   log.info("Creating directory");
 
-  mkdirSync(basePath);
+  console.log(__basepath);
+  copy(join(__basepath, "template"), basePath);
 
   log.info("Directory created");
 
@@ -52,7 +56,6 @@ export default async (day: string) => {
     const inputData = await fetch(
       `https://adventofcode.com/${process.env.YEAR}/day/${parsedDay}/input`,
     );
-
     inputFileContent = inputData;
   } else {
     log.warn(
@@ -69,14 +72,6 @@ export default async (day: string) => {
     )}\``,
   );
   log.log("success", "Saved input file");
-
-  log.info("Copy index template");
-
-  copyFileSync(
-    join(__dirname, "dayTemplate.ts.template"),
-    join(basePath, "index.ts"),
-  );
-  log.log("success", "Saved index file");
 };
 
 const saveReadme = async (basePath: string, day: any, part: 1 | 2) => {
@@ -107,6 +102,8 @@ const saveReadme = async (basePath: string, day: any, part: 1 | 2) => {
 const fetch = async (url: string) =>
   (
     await axios.get(url, {
+      responseType: "text",
+      transformResponse: data => data,
       headers: {
         Cookie: `session=${process.env.SESSION}`,
       },

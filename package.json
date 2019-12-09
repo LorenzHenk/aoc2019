@@ -8,6 +8,7 @@
     "chalk": "^3.0.0",
     "commander": "^4.0.1",
     "dotenv": "^8.2.0",
+    "fs-extra": "^8.1.0",
     "jsdom": "^15.2.1",
     "lodash": "^4.17.15",
     "md5": "^2.2.1",
@@ -18,12 +19,14 @@
   },
   "scripts": {
     "test": "jest",
-    "start": "yarn node -r ts-node/register src/index.ts"
+    "start": "yarn node -r ts-node/register src/index.ts",
+    "build": "yarn tsc"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/chalk": "^2.2.0",
     "@types/dotenv": "^8.2.0",
+    "@types/fs-extra": "^8.0.1",
     "@types/jest": "^24.0.23",
     "@types/jsdom": "^12.2.4",
     "@types/lodash": "^4.14.149",
