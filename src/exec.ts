@@ -1,18 +1,13 @@
-import { readFileSync } from "fs";
-import path from "path";
-
 import { DaySolver, Day } from "./types";
 import { log } from "./logging";
 
-import * as days from "./days";
-
-export const runDay = (
+export const runDay = async (
   day: string,
   options: { runPartOne: boolean; runPartTwo: boolean },
 ) => {
   log.info(`Running ${day}`);
 
-  const theDay: Day = (days as any)[day];
+  const theDay: Day = await import(`./days/${day}`);
   if (!theDay) {
     log.error("Day not found");
     return;
