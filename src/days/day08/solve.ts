@@ -22,4 +22,29 @@ export const solvePartOne = (input: string) => {
 };
 
 export const solvePartTwo = (input: string) => {
+  const parsed = parseOne(input);
+  const keys = Object.keys(parsed);
+  const width = 25;
+  const height = 6;
+  const size = width * height;
+  const res = [];
+  for (let ix = 0; ix < size; ix++) {
+    for (let kix = 0; kix < keys.length; kix++) {
+      let layer = parsed[keys[kix]];
+
+      if (layer[ix] !== 2) {
+        res.push(layer[ix]);
+        break;
+      }
+    }
+  }
+
+  for (let row = 0; row < height; row++) {
+    const buffer = [];
+    for (let column = 0; column < width; column++) {
+      let r = res[row * width + column];
+      buffer.push(r === 0 ? "█" : " ");
+    }
+    console.log(buffer.join(""));
+  }
 };
