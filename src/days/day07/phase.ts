@@ -1,33 +1,62 @@
-import { run } from "./run";
+import { Amplifier } from "./amplifier";
+import { generatePermutations } from "./utils";
 
 export const runPhase = (intcodes: number[], input: number[]) => {
   let additionalInput: number = 0;
+  const amplifiers = Array.from({ length: 5 }).map(
+    (_, ix) => new Amplifier([...intcodes], input[ix]),
+  );
+
   for (let i = 0; i < 5; i++) {
-    additionalInput = run(intcodes, [input[i], additionalInput]).output[0];
+    const amplifier = amplifiers[i];
+    amplifier.addInput(additionalInput);
+    amplifier.run();
+
+    additionalInput = amplifier.LastOutput;
+
+    // console.log(i, amplifier.LastOutput, amplifier.done);
   }
 
   return additionalInput;
 };
 
-export const runAllPhases = (intcodes: number[]) => {
+export const runAllPhases = (
+  intcodes: number[],
+  runner: (intcodes: number[], input: number[]) => number,
+  seq = [0, 1, 2, 3, 4],
+) => {
+  const settings = generatePermutations(seq);
   const results = [];
 
-  let sequence: number[];
-  for (let a = 0; a < 5; a++) {
-    for (let b = 0; b < 5; b++) {
-      if (a === b) continue;
-      for (let c = 0; c < 5; c++) {
-        if (a === c || b === c) continue;
-        for (let d = 0; d < 5; d++) {
-          if (a === d || b === d || c === d) continue;
-          for (let e = 0; e < 5; e++) {
-            if (a === e || b === e || c === e || d === e) continue;
-            sequence = [a, b, c, d, e];
-            results.push({ sequence, result: runPhase(intcodes, sequence) });
-          }
-        }
-      }
-    }
+  for (let index = 0; index < settings.length; index++) {
+    const sequence = settings[index];
+
+    results.push({ sequence, result: runner(intcodes, sequence) });
   }
   return results;
 };
+
+export const runPhasePartTwo = (intcodes: number[], input: number[]) => {
+  let additionalInput: number = 0;
+  const amplifiers = Array.from({ length: 5 }).map(
+    (_, ix) => new Amplifier([...intcodes], input[ix]),
+  );
+
+  while (!amplifiers.every(amp => amp.Finished)) {
+    for (let i = 0; i < 5; i++) {
+      const amplifier = amplifiers[i];
+      amplifier.addInput(additionalInput);
+      amplifier.run();
+
+      additionalInput = amplifier.LastOutput;
+    }
+  }
+
+  return additionalInput;
+};
+
+export const preparePartOne = (intcodes: number[]) =>
+  runAllPhases(intcodes, runPhase);
+
+export const preparePartTwo = (intcodes: number[]) =>
+  runAllPhases(intcodes, runPhasePartTwo, [5, 6, 7, 8, 9]);
