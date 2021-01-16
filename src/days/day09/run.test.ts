@@ -1,53 +1,37 @@
-import {
-  getParameterMode,
-  getParameterModes,
-  getValue,
-  Mode,
-  runPartOne,
-  runPartTwo,
-} from "./run";
+import { getValue, Mode, runPartOne, runPartTwo } from "./run";
 import { parse } from "./parse";
-
-describe("getParamterMode(s)", () => {
-  test("getParameterMode works", () => {
-    const input = 10102;
-    expect(getParameterMode(input, 0)).toEqual(1);
-    expect(getParameterMode(input, 1)).toEqual(0);
-    expect(getParameterMode(input, 2)).toEqual(1);
-    expect(getParameterMode(input, 3)).toEqual(0);
-  });
-
-  test("getParameterModes works", () => {
-    const input = 10102;
-    expect(getParameterModes(input, 3)).toEqual([1, 0, 1]);
-    expect(getParameterModes(input, 4)).toEqual([1, 0, 1, 0]);
-    expect(getParameterModes(input, 5)).toEqual([1, 0, 1, 0, 0]);
-    expect(getParameterModes(input, 6)).toEqual([1, 0, 1, 0, 0, 0]);
-  });
-});
 
 test("getValue", () => {
   const ic = [1, 2, 3];
-  expect(getValue(ic, Mode.Reference, 0)).toEqual(1);
-  expect(getValue(ic, Mode.Reference, 1)).toEqual(2);
-  expect(getValue(ic, Mode.Reference, 2)).toEqual(3);
-  expect(getValue(ic, Mode.Immediate, -5)).toEqual(-5);
-  expect(getValue(ic, Mode.Immediate, 20)).toEqual(20);
+  expect(getValue(ic, Mode.Reference, 0, 0)).toEqual(1);
+  expect(getValue(ic, Mode.Reference, 1, 0)).toEqual(2);
+  expect(getValue(ic, Mode.Reference, 2, 0)).toEqual(3);
+  expect(getValue(ic, Mode.Immediate, -5, 0)).toEqual(-5);
+  expect(getValue(ic, Mode.Immediate, 20, 0)).toEqual(20);
 });
 
 describe("runPartOne", () => {
-  test("Run `1002,4,3,4,33`", () => {
-    const input = `1002,4,3,4,33`;
+  test("Run `109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99`", () => {
+    const input = `109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99`;
     const ic = parse(input);
-    const result = runPartOne(ic);
-    expect(result.ic[4]).toEqual(99);
+    const result = runPartOne(ic, 0);
+    expect(result.output.join(",")).toEqual(input);
   });
 
-  test("Run `1101,100,-1,4,0`", () => {
-    const input = `1101,100,-1,4,0`;
+  test("Run `1102,34915192,34915192,7,4,7,99,0`", () => {
+    const input = `1102,34915192,34915192,7,4,7,99,0`;
     const ic = parse(input);
-    const result = runPartOne(ic);
-    expect(result.ic[4]).toEqual(99);
+    const result = runPartOne(ic, 0);
+    expect(result.output[result.output.length - 1].toString().length).toEqual(
+      16,
+    );
+  });
+
+  test("Run `104,1125899906842624,99`", () => {
+    const input = `104,1125899906842624,99`;
+    const ic = parse(input);
+    const result = runPartOne(ic, 0);
+    expect(result.output[result.output.length - 1]).toEqual(ic[1]);
   });
 });
 

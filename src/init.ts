@@ -26,6 +26,13 @@ export default async (day: string) => {
     return;
   }
 
+  if (!process.env.SESSION) {
+    log.error(
+      "SESSION not set, could not retrieve input data. Did you forget to setup the .env file?",
+    );
+    return;
+  }
+
   const parsedDay = parseInt(value);
 
   const directoryName = `day${parsedDay.toString().padStart(2, "0")}`;
@@ -51,18 +58,9 @@ export default async (day: string) => {
 
   log.info("Retrieve input data");
 
-  let inputFileContent: string;
-  if (process.env.SESSION) {
-    const inputData = await fetch(
-      `https://adventofcode.com/${process.env.YEAR}/day/${parsedDay}/input`,
-    );
-    inputFileContent = inputData;
-  } else {
-    log.warn(
-      "Environment variable `SESSION` missing, cannot retrieve input data",
-    );
-    inputFileContent = "";
-  }
+  const inputFileContent = await fetch(
+    `https://adventofcode.com/${process.env.YEAR}/day/${parsedDay}/input`,
+  );
 
   writeFileSync(
     join(basePath, "input.ts"),
@@ -103,7 +101,7 @@ const fetch = async (url: string) =>
   (
     await axios.get(url, {
       responseType: "text",
-      transformResponse: data => data,
+      transformResponse: (data) => data,
       headers: {
         Cookie: `session=${process.env.SESSION}`,
       },

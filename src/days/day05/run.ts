@@ -30,7 +30,7 @@ export interface OpcodeRunner {
     input,
     output,
   }: OpcodeRunnerParams) => number | void;
-  len?: number;
+  len: number;
 }
 
 const opcodes: Record<number, OpcodeRunner> = {
@@ -139,7 +139,7 @@ export const runPartTwo = (intcodes: number[], input: number = 5) => {
     if (typeof result === "number") {
       i = result;
     } else {
-      i += len!;
+      i += len;
     }
   }
   return { ic, output };
