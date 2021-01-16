@@ -27,6 +27,17 @@ export const getValue = (
     [Mode.Relative]: () => intcodes[relativeBaseOffset + value],
   }[mode]() ?? null);
 
+export const getReferenceIndex = (
+  mode: Mode,
+  value: number,
+  relativeBaseOffset: number,
+) => {
+  if (mode === Mode.Immediate) {
+    throw Error("Immediate mode not supported");
+  }
+  return mode === Mode.Reference ? value : value + relativeBaseOffset;
+};
+
 export interface OpcodeRunnerParams {
   intcodes: number[];
   index: number;
@@ -55,7 +66,7 @@ const opcodes: Record<number, OpcodeRunner> = {
     runner: ({ intcodes, index, relativeBaseOffset }) => {
       const [oc, v1, v2, out] = intcodes.slice(index);
       const [m1, m2, m3] = getParameterModes(oc, 3);
-      intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] =
+      intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] =
         getValue(intcodes, m1, v1, relativeBaseOffset) +
         getValue(intcodes, m2, v2, relativeBaseOffset);
     },
@@ -65,7 +76,7 @@ const opcodes: Record<number, OpcodeRunner> = {
     runner: ({ intcodes, index, relativeBaseOffset }) => {
       const [oc, v1, v2, out] = intcodes.slice(index);
       const [m1, m2, m3] = getParameterModes(oc, 3);
-      intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] =
+      intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] =
         getValue(intcodes, m1, v1, relativeBaseOffset) *
         getValue(intcodes, m2, v2, relativeBaseOffset);
     },
@@ -75,7 +86,7 @@ const opcodes: Record<number, OpcodeRunner> = {
     runner: ({ intcodes, index, input, relativeBaseOffset }) => {
       const [oc, out] = intcodes.slice(index);
       const [m1] = getParameterModes(oc, 1);
-      intcodes[m1 === Mode.Reference ? out : relativeBaseOffset + out] = input;
+      intcodes[getReferenceIndex(m1, out, relativeBaseOffset)] = input;
     },
     len: 2,
   },
@@ -129,9 +140,9 @@ const opcodes: Record<number, OpcodeRunner> = {
         getValue(intcodes, m1, v1, relativeBaseOffset) <
         getValue(intcodes, m2, v2, relativeBaseOffset)
       ) {
-        intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] = 1;
+        intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] = 1;
       } else {
-        intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] = 0;
+        intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] = 0;
       }
     },
     len: 4,
@@ -144,9 +155,9 @@ const opcodes: Record<number, OpcodeRunner> = {
         getValue(intcodes, m1, v1, relativeBaseOffset) ===
         getValue(intcodes, m2, v2, relativeBaseOffset)
       ) {
-        intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] = 1;
+        intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] = 1;
       } else {
-        intcodes[m3 === Mode.Reference ? out : relativeBaseOffset + out] = 0;
+        intcodes[getReferenceIndex(m3, out, relativeBaseOffset)] = 0;
       }
     },
     len: 4,
