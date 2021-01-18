@@ -1,5 +1,5 @@
 import { Asteroid } from "./parse";
-import { getDetectableAsteroids, runPartOne } from "./run";
+import { getDetectableAsteroids, runPartOne, runPartTwo } from "./run";
 
 describe("test implementation", () => {
   test("getDetectableAsteroids recognizes all 8 asteroids directly around it", () => {
@@ -7,7 +7,10 @@ describe("test implementation", () => {
       x: index % 3,
       y: Math.floor(index / 3),
     }));
-    expect(getDetectableAsteroids(asteroids, asteroids[4])).toEqual(8);
+    expect(
+      getDetectableAsteroids(asteroids, asteroids[4]).detectedAsteroidsRelative
+        .length,
+    ).toEqual(8);
   });
 });
 
@@ -90,5 +93,6 @@ describe("test examples", () => {
     ###.##.####.##.#..###`;
 
     expect(runPartOne(input)).toEqual(210);
+    expect(runPartTwo(input)).toEqual(802);
   });
 });
