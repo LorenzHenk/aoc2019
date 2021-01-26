@@ -1,3 +1,4 @@
+import solutionInput from "./input";
 import { Asteroid } from "./parse";
 import { getDetectableAsteroids, runPartOne, runPartTwo } from "./run";
 
@@ -95,4 +96,9 @@ describe("test examples", () => {
     expect(runPartOne(input)).toEqual(210);
     expect(runPartTwo(input)).toEqual(802);
   });
+});
+
+test("results", () => {
+  expect(runPartOne(solutionInput)).toEqual(253);
+  expect(runPartTwo(solutionInput)).toEqual(815);
 });

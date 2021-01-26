@@ -1,6 +1,6 @@
 import { Asteroid, parse } from "./parse";
 
-function printMap(asteroids: Asteroid[], values?: number[]) {
+export function printMap(asteroids: Asteroid[], values?: number[]) {
   const maxX = Math.max(...asteroids.map(({ x }) => x));
   const maxY = Math.max(...asteroids.map(({ y }) => y));
 
@@ -22,8 +22,13 @@ function isPositive(n: number): boolean {
   return n > 0;
 }
 
+interface PositionalAsteroid {
+  absolute: Asteroid;
+  relative: Asteroid;
+}
+
 interface DetectedAsteroidsResult {
-  allAsteroids: { absolute: Asteroid; relative: Asteroid }[];
+  allAsteroids: PositionalAsteroid[];
   detectedAsteroidsRelative: Asteroid[];
   currentAsteroid: Asteroid;
 }
@@ -95,6 +100,54 @@ export function getDetectableAsteroids(
   };
 }
 
+interface PositionalAsteroidWithDegree extends PositionalAsteroid {
+  distance: number;
+  degree: number;
+}
+
+function getAsteroidWithAdditionalPositionalInformation(
+  asteroid: PositionalAsteroid,
+): PositionalAsteroidWithDegree {
+  const { relative } = asteroid;
+
+  return {
+    ...asteroid,
+    distance: Math.sqrt(Math.pow(relative.x, 2) + Math.pow(relative.y, 2)),
+    // use the degree for ordering
+    // y must be inverted
+    // use atan2 to get the correct angle (I learned this at a CCC some years ago)
+    // convert from rad to deg
+    degree: (Math.atan2(-1 * relative.y, relative.x) * 180) / Math.PI,
+  };
+}
+
+interface AsteroidWithShiftedDegree extends PositionalAsteroidWithDegree {
+  /**
+   * going clockwise, starting on top with 0
+   */
+  shiftedDegree: number;
+}
+
+function getShiftedDegree(asteroid: PositionalAsteroidWithDegree) {
+  return { ...asteroid, shiftedDegree: (360 - asteroid.degree + 90) % 360 };
+}
+
+function groupBy<Obj extends Record<string, unknown>, Key extends keyof Obj>(
+  data: Obj[],
+  groupKey: Key,
+) {
+  return data.reduce(
+    (acc, next) => ({
+      ...acc,
+      [next[groupKey] as string]: [
+        ...(acc[next[groupKey] as string] ?? []),
+        next,
+      ],
+    }),
+    {} as Record<string, Obj[]>,
+  );
+}
+
 export function runPartOne(input: string): number {
   const { asteroids } = parse(input);
   const asteroidResults = asteroids.map((asteroid) =>
@@ -103,8 +156,6 @@ export function runPartOne(input: string): number {
   const detectedAsteroidCounts = asteroidResults.map(
     (r) => r.detectedAsteroidsRelative.length,
   );
-  printMap(asteroids);
-  printMap(asteroids, detectedAsteroidCounts);
   return Math.max(...detectedAsteroidCounts);
 }
 
@@ -119,38 +170,31 @@ export function runPartTwo(input: string): number {
 
   const max = Math.max(...detectedAsteroidCounts);
 
-  const monitoringStationIndex = asteroidResults.findIndex(
+  // our monitoring station
+  const monitoringStation = asteroidResults.find(
     (r) => r.detectedAsteroidsRelative.length === max,
   );
 
-  // our monitoring station
-  const monitoringStation = asteroidResults[monitoringStationIndex];
+  if (!monitoringStation) {
+    throw Error("Monitoring station must be found");
+  }
 
   const asteroidsWithPositionalInformation = monitoringStation.allAsteroids
-    .map((a) => ({
-      ...a,
-      distance: Math.sqrt(
-        Math.pow(a.relative.x, 2) + Math.pow(a.relative.y, 2),
-      ),
-      // use the degree for ordering
-      // y must be inverted
-      // use atan2 to get the correct angle (I learned this at a CCC some years ago)
-      // convert from rad to deg
-      degree: (Math.atan2(-1 * a.relative.y, a.relative.x) * 180) / Math.PI,
-    }))
+    .map(getAsteroidWithAdditionalPositionalInformation)
     // the degree when starting at the top and going clockwise
-    .map((a) => ({ ...a, shiftedDegree: (360 - a.degree + 90) % 360 }));
+    .map(getShiftedDegree);
 
-  const asteroidsGroupedByDegree = asteroidsWithPositionalInformation.reduce(
-    (acc, next) => ({
-      ...acc,
-      [next.shiftedDegree]: [...(acc[next.shiftedDegree] ?? []), next].sort(
-        // lower distance first
-        (a, b) => a.distance - b.distance,
-      ),
-    }),
-    {} as Record<number, typeof asteroidsWithPositionalInformation>,
+  const asteroidsGroupedByDegree = groupBy(
+    asteroidsWithPositionalInformation,
+    "shiftedDegree",
   );
+
+  Object.values(asteroidsGroupedByDegree).forEach((v) => {
+    v.sort(
+      // lower distance first
+      (a, b) => a.distance - b.distance,
+    );
+  });
 
   // use this list to determine the next asteroid
   const possibleDegreeValues = Object.keys(asteroidsGroupedByDegree)
@@ -178,8 +222,6 @@ export function runPartTwo(input: string): number {
   if (!asteroidWithPositionalInformation) {
     throw Error("invalid value!");
   }
-
-  console.log(`${i}th asteroid destroyed:`, asteroidWithPositionalInformation);
 
   return (
     asteroidWithPositionalInformation.absolute.x * 100 +
